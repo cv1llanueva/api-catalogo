@@ -1,0 +1,3349 @@
+openapi: 3.0.0
+info:
+  title: API Catalog
+  description: API documentation for G&M insurance company in Singapore.
+  version: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - url: http://api.gym.com
+  - url: http://lb-prod-712608254.us-east-1.elb.amazonaws.com/
+  
+tags:
+- name: Person
+  description: API for managing Clients and potential Clients at G&M
+- name: InsuranceCompany
+  description: Managing insurance companies
+- name: IdentityVerification
+  description: API for identity verification in Singapore
+- name: Quotation
+  description: Management of travel and auto insurance quotations
+- name: CarInsurancePolicy
+  description: Management of car insurance policies
+- name: PymeInsurancePolicy
+  description: Management of SME insurance policies
+- name: HomeInsurancePolicy
+  description: Management of home insurance policies
+- name: TravelInsurancePolicy
+  description: Management of travel insurance policies
+- name: LifeInsurancePolicy
+  description: Management of life insurance policies
+- name: Product
+  description: Managing insurance products
+- name: Payments
+  description: Management of insurance payments
+- name: RiskEvaluation
+  description: Risk evaluation
+- name: VirtualAssistant
+  description: Virtual assistance
+  
+paths:
+  /api/v1/identity-verification:
+    get:
+      tags: 
+        - IdentityVerification
+      summary: Obtener información de identidad
+      description: Recupera información de identidad basada en el tipo y número de documento.
+      parameters:
+        - name: documentType.id
+          in: query
+          required: true
+          description: El ID del tipo de documento.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 10
+            pattern: "^[A-Za-z0-9_-]+$"
+        - name: documentNumber
+          in: query
+          required: true
+          description: El número de documento.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 20
+            pattern: "^[A-Za-z0-9]+$"
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityInfo'
+        '400':
+          description: Solicitud incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1//persons:
+    get:
+      tags: 
+      - Person
+      summary: Obtiene todas las personas.
+      description: Retorna una lista de todas las personas registradas en el sistema.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonOutput'
+        '204':
+          description: No Content
+  /api/v1//person:
+    post:
+      tags: 
+      - Person
+      summary: Crea una nueva persona.
+      description: Crea un nuevo registro de persona.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonInput'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonOutput'          
+        '400':
+          description: Bad Request 
+            <br>- **ERR0001:** Error, Field required
+            <br>- **ERR0005:** Error, invalid documentType
+            <br>- **ERR0006:** Error, String should have at most 12 characters
+            <br>- **ERR0012:** Error, the birth date cannot be before 1900-01-01
+            <br>- **ERR0013:** Error, the birth date cannot be in the future
+            <br>- **ERR0014:** Error, invalid date format
+            <br>- **ERR0015:** Error, field cannot exceed maximum length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        '404':
+          description: Not Found 
+            <br>- **ERR0003:** Error, person not found 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        '500':
+          description: Internal Server Error
+            <br>- **ERR0020:** Error, Duplicate entry for key 'Person unique_document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+  /api/v1/person/{personId}:
+    get:
+      tags: 
+      - Person
+      summary: Obtiene los detalles de una persona por su ID.
+      description: Retorna los detalles de una persona específica basada en su ID.
+      parameters:
+        - in: path
+          name: personId
+          required: true
+          description: ID de la persona a obtener.
+          schema:
+            type: string
+          example: "1"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonOutput'
+        '400':
+          description: Bad Request 
+            <br>- **ERR0001:** Error, Field required
+        '404':
+          description: Not Found 
+            <br>- **ERR0003:** Error, person not found 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+    put:
+      tags: 
+      - Person
+      summary: Actualiza los detalles de una persona por su ID.
+      description: Actualiza los detalles de una persona específica basada en su ID.
+      parameters:
+        - in: path
+          name: personId
+          required: true
+          description: ID de la persona a actualizar.
+          schema:
+            type: string
+          example: "1"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonInput'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request 
+            <br>- **ERR0001:** Error, Field required
+            <br>- **ERR0005:** Error, invalid documentType
+            <br>- **ERR0006:** Error, String should have at most 12 characters
+            <br>- **ERR0012:** Error, the birth date cannot be before 1900-01-01
+            <br>- **ERR0013:** Error, the birth date cannot be in the future
+            <br>- **ERR0014:** Error, invalid date format
+            <br>- **ERR0015:** Error, field cannot exceed maximum length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        '404':
+          description: Not Found 
+            <br>- **ERR0003:** Error, person not found 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+    delete:
+      tags: 
+      - Person
+      summary: Elimina una persona por su ID.
+      description: Elimina una persona específica basada en su ID.
+      parameters:
+        - in: path
+          name: personId
+          required: true
+          description: ID de la persona a eliminar.
+          schema:
+            type: string
+          example: "1"
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request 
+            <br>- **ERR0001:** Error, Field required
+        '404':
+          description: Not Found 
+            <br>- **ERR0003:** Error, person not found 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/quotation/travel:
+    post:
+      tags:
+        - Quotation
+      summary: Create a new travel insurance quotation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelQuotationInput'
+      responses:
+        '200':
+          description: OK. Quotation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelQuotationOutput'
+        '400':
+          description: Bad Request. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+  /api/v1/quotation/travel/{quotationId}:
+    put:
+      tags:
+        - Quotation    
+      summary: Update an existing travel insurance quotation
+      parameters:
+        - in: path
+          name: quotationId
+          required: true
+          description: ID of the quotation to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelQuotationInput'
+      responses:
+        '200':
+          description: OK. Quotation updated successfully.
+        '400':
+          description: Bad Request. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: Not Found. Quotation with the provided ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+    get:
+      tags:
+        - Quotation
+      summary: Get details of a travel insurance quotation by ID
+      parameters:
+        - in: path
+          name: quotationId
+          required: true
+          description: ID of the quotation to get.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK. Returns details of the requested quotation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelQuotationOutput'
+        '400':
+          description: Bad Request. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: Not Found. Quotation with the provided ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+    delete:
+      tags:
+        - Quotation
+      summary: Delete a specific travel insurance quotation.
+      description: Delete a specific travel insurance quotation by its ID.
+      parameters:
+        - in: path
+          name: quotationId
+          required: true
+          description: ID of the travel insurance quotation to delete.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found. Quotation with the provided ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+          
+  /api/v1/quotation/auto:
+    post:
+      tags:
+        - Quotation
+      summary: Create a new automobile insurance quotation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoQuotationInput'
+      responses:
+        '200':
+          description: OK. Quotation created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoQuotationOutput'
+        '400':
+          description: Bad Request. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+  /api/v1/quotation/auto/{quotationId}:
+    put:
+      tags:
+        - Quotation
+      summary: Update an existing automobile insurance quotation
+      parameters:
+        - in: path
+          name: quotationId
+          required: true
+          description: ID of the quotation to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoQuotationInput'
+      responses:
+        '200':
+          description: OK. Quotation updated successfully.
+        '400':
+          description: Bad Request. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: Not Found. Quotation with the provided ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+  
+    get:
+      tags:
+        - Quotation
+      summary: Get details of an automobile insurance quotation by ID
+      parameters:
+        - in: path
+          name: quotationId
+          required: true
+          description: ID of the quotation to get.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK. Returns details of the requested quotation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoQuotationOutput'
+        '400':
+          description: Bad Request. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: Not Found. Quotation with the provided ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+    delete:
+      tags:
+        - Quotation
+      summary: Delete a specific auto insurance quotation.
+      description: Delete a specific auto insurance quotation by its ID.
+      parameters:
+        - in: path
+          name: quotationId
+          required: true
+          description: ID of the auto insurance quotation to delete.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found. Quotation with the provided ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error. See error details in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/product/:
+    post:
+      tags:
+        - Product
+      summary: Create a new personal accident insurance product.
+      description: Endpoint to create a new personal accident insurance product.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalAccidentInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalAccidentOutput'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/products/{productId}:
+    put:
+      tags:
+        - Product
+      summary: Update a personal accident insurance product by ID.
+      description: Endpoint to update an existing personal accident insurance product.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: ID of the product to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalAccidentInput'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+    get:
+      tags:
+        - Product
+      summary: Get details of a personal accident insurance product by ID.
+      description: Endpoint to retrieve details of a personal accident insurance product by its ID.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: ID of the product to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalAccidentOutput'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+    delete:
+      tags:
+        - Product
+      summary: Delete a personal accident insurance product by ID.
+      description: Endpoint to delete a personal accident insurance product by its ID.
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: ID of the product to delete.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/products/:
+    get:
+      tags:
+        - Product
+      summary: Get a list of all personal accident insurance products.
+      description: Endpoint to retrieve a list of all personal accident insurance products.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonalAccidentOutput'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/insuranceCompany/:
+    post:
+      tags:
+        - InsuranceCompany
+      summary: Create a new insurance company.
+      description: Endpoint to create a new insurance company.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsuranceCompanyInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceCompanyOutput'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/insuranceCompany/{companyId}:
+    put:
+      tags:
+        - Insurance Company
+      summary: Update an insurance company by ID.
+      description: Endpoint to update an existing insurance company.
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          description: ID of the company to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsuranceCompanyInput'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+    get:
+      tags:
+        - Insurance Company
+      summary: Get details of an insurance company by ID.
+      description: Endpoint to retrieve details of an insurance company by its ID.
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          description: ID of the company to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceCompanyOutput'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+    delete:
+      tags:
+        - Insurance Company
+      summary: Delete an insurance company by ID.
+      description: Endpoint to delete an insurance company by its ID.
+      parameters:
+        - in: path
+          name: companyId
+          required: true
+          description: ID of the company to delete.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+
+  /api/v1/insuranceCompanies/:
+    get:
+      tags:
+        - Insurance Company
+      summary: Get a list of all insurance companies.
+      description: Endpoint to retrieve a list of all insurance companies.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InsuranceCompanyOutput'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+  
+  /api/v1//home-insurance:
+    get:
+      tags:
+      - HomeInsurancePolicy
+      summary: Obtiene todos los seguros de hogar.
+      description: Retorna una lista de todos los seguros de hogar registrados en el sistema.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HomeInsurancePolicyOutput'
+        "204":
+          description: No Content - No existen seguros de hogar registrados
+    post:
+      tags:
+      - HomeInsurancePolicy
+      summary: Crea un nuevo seguro de hogar.
+      description: Crea un nuevo registro de seguro de hogar.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeInsurancePolicyInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomeInsurancePolicyOutput'
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0002:** Error, no debe tener caracteres especiales <br>- **ERR0018:** Error, tipo de propiedad inválido <br>- **ERR0019:** Error, dirección inválida <br>- **ERR0020:** Error, valor de propiedad inválido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "409":
+          description: "409 Conflict <br>- **ERR0021:** Error, el seguro de hogar ya ha sido registrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    x-code-samples:
+    - lang: curl
+      label: Curl
+      source: |
+        curl -X POST "http://api.example.com/home-insurance" -H "Content-Type: application/json" -d '{"quotationId":123 ,propertyType":"house", "address":"123 Main St", "propertyValue":250000, "coverageAmount":200000, "policyHolderId":1}'
+  /api/v1//home-insurance/{insuranceId}:
+    get:
+      tags:
+      - HomeInsurancePolicy
+      summary: Obtiene los detalles de un seguro de hogar por su ID.
+      description: Retorna los detalles de un seguro de hogar específico basado en su ID.
+      parameters:
+      - name: insuranceId
+        in: path
+        description: ID del seguro de hogar a obtener.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomeInsurancePolicyOutput'
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0022:** Error, código de seguro inválido"
+        "404":
+          description: "Not Found <br>- **ERR0023:** Error, el seguro de hogar no existe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - HomeInsurancePolicy
+      summary: Actualiza los detalles de un seguro de hogar por su ID.
+      description: Actualiza los detalles de un seguro de hogar específico basado en su ID.
+      parameters:
+      - name: insuranceId
+        in: path
+        description: ID del seguro de hogar a actualizar.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeInsurancePolicyInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0002:** Error, no debe tener caracteres especiales <br>- **ERR0018:** Error, tipo de propiedad inválido <br>- **ERR0019:** Error, dirección inválida <br>- **ERR0020:** Error, valor de propiedad inválido"
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+      - HomeInsurancePolicy
+      summary: Elimina un seguro de hogar por su ID.
+      description: Elimina un seguro de hogar específico basado en su ID.
+      parameters:
+      - name: insuranceId
+        in: path
+        description: ID del seguro de hogar a eliminar.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0022:** Error, código de seguro inválido"
+        "404":
+          description: "Not Found <br>- **ERR0023:** Error, el seguro de hogar no existe"
+        "500":
+          description: Internal Server Error
+    x-code-samples:
+    - lang: curl
+      label: Curl
+      source: |
+        curl -X DELETE "http://api.example.com/home-insurance/{insuranceId}"
+  /api/v1/travel-insurance:
+    get:
+      tags:
+      - TravelInsurancePolicy
+      summary: Obtiene todos los seguros de viajes.
+      description: Retorna una lista de todos los seguros de viajes registrados en el sistema.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelInsurancePolicyOutput'
+        "204":
+          description: No Content - No existen seguros de viajes registrados
+    post:
+      tags:
+      - TravelInsurancePolicy
+      summary: Crea un nuevo seguro de viaje.
+      description: Crea un nuevo registro de seguro de viaje.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelInsurancePolicyInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelInsurancePolicyOutput'
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0002:** Error, no debe tener caracteres especiales <br>- **ERR0024:** Error, tipo de viaje inválido <br>- **ERR0025:** Error, fechas de viaje inválidas"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "409":
+          description: "409 Conflict <br>- **ERR0026:** Error, el seguro de viaje ya ha sido registrado"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    x-code-samples:
+    - lang: curl
+      label: Curl
+      source: |
+        curl -X POST "http://api.example.com/travel-insurance" -H "Content-Type: application/json" -d '{"tripType":"international", "destination":"Spain", "startDate":"2023-06-01", "endDate":"2023-06-15", "coverageAmount":100000, "policyHolderId":1}'
+  /api/v1/travel-insurance/{insuranceId}:
+    get:
+      tags:
+      - TravelInsurancePolicy
+      summary: Obtiene los detalles de un seguro de viaje por su ID.
+      description: Retorna los detalles de un seguro de viaje específico basado en su ID.
+      parameters:
+      - name: insuranceId
+        in: path
+        description: ID del seguro de viaje a obtener.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelInsurancePolicyOutput'
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0027:** Error, código de seguro inválido"
+        "404":
+          description: "Not Found <br>- **ERR0028:** Error, el seguro de viaje no existe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - TravelInsurancePolicy
+      summary: Actualiza los detalles de un seguro de viaje por su ID.
+      description: Actualiza los detalles de un seguro de viaje específico basado en su ID.
+      parameters:
+      - name: insuranceId
+        in: path
+        description: ID del seguro de viaje a actualizar.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelInsurancePolicyInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0002:** Error, no debe tener caracteres especiales <br>- **ERR0024:** Error, tipo de viaje inválido <br>- **ERR0025:** Error, fechas de viaje inválidas"
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+      - TravelInsurancePolicy
+      summary: Elimina un seguro de viaje por su ID.
+      description: Elimina un seguro de viaje específico basado en su ID.
+      parameters:
+      - name: insuranceId
+        in: path
+        description: ID del seguro de viaje a eliminar.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0027:** Error, código de seguro inválido"
+        "404":
+          description: "Not Found <br>- **ERR0028:** Error, el seguro de viaje no existe"
+        "500":
+          description: Internal Server Error
+    x-code-samples:
+    - lang: curl
+      label: Curl
+      source: |
+        curl -X DELETE "http://api.example.com/travel-insurance/{insuranceId}"
+  /api/v1//payments:
+    get:
+      tags:
+      - Payments
+      summary: Obtiene todos los pagos registrados.
+      description: Retorna una lista de todos los pagos registrados en el sistema.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentOutput'
+        "204":
+          description: No Content - No existen pagos registrados
+    post:
+      tags:
+      - Payments
+      summary: Registra un nuevo pago.
+      description: Registra un nuevo pago en el sistema.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOutput'
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0029:** Error, monto de pago inválido <br>- **ERR0030:** Error, método de pago inválido"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    x-code-samples:
+    - lang: curl
+      label: Curl
+      source: |
+        curl -X POST "http://api.example.com/payments" -H "Content-Type: application/json" -d '{"insuranceId":1, "amount":500, "paymentMethod":"credit_card", "paymentDate":"2023-06-01"}'
+  /api/v1//payments/{paymentId}:
+    get:
+      tags:
+      - Payments
+      summary: Obtiene los detalles de un pago por su ID.
+      description: Retorna los detalles de un pago específico basado en su ID.
+      parameters:
+      - name: paymentId
+        in: path
+        description: ID del pago a obtener.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOutput'
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0031:** Error, código de pago inválido"
+        "404":
+          description: "Not Found <br>- **ERR0032:** Error, el pago no existe"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - Payments
+      summary: Actualiza los detalles de un pago por su ID.
+      description: Actualiza los detalles de un pago específico basado en su ID.
+      parameters:
+      - name: paymentId
+        in: path
+        description: ID del pago a actualizar.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0029:** Error, monto de pago inválido <br>- **ERR0030:** Error, método de pago inválido"
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+      - Payments
+      summary: Elimina un pago por su ID.
+      description: Elimina un pago específico basado en su ID.
+      parameters:
+      - name: paymentId
+        in: path
+        description: ID del pago a eliminar.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "1"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: "Bad Request <br>- **ERR0001:** Error, complete los campos obligatorios <br>- **ERR0031:** Error, código de pago inválido"
+        "404":
+          description: "Not Found <br>- **ERR0032:** Error, el pago no existe"
+        "500":
+          description: Internal Server Error
+    x-code-samples:
+    - lang: curl
+      label: Curl
+      source: |
+        curl -X DELETE "http://api.example.com/payments/{paymentId}"
+
+  /api/v1/car:
+    get:
+      tags:
+      - CarInsurancePolicy
+      summary: Obtiene los detalles del seguro de un automóvil.
+      description: Retorna los detalles del seguro de un automóvil específico basado en su ID.
+      parameters:
+      - name: carId
+        in: query
+        description: ID del automóvil.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    post:
+      tags:
+      - CarInsurancePolicy
+      summary: Crea un nuevo seguro para un automóvil.
+      description: Crea un nuevo registro de seguro para un automóvil específico.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - CarInsurancePolicy
+      summary: Actualiza un seguro existente para un automóvil.
+      description: Actualiza un registro de seguro para un automóvil específico.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+      - CarInsurancePolicy
+      summary: Elimina un seguro para un automóvil.
+      description: Elimina un registro de seguro para un automóvil específico basado en su ID.
+      parameters:
+      - name: carId
+        in: query
+        description: ID del automóvil.
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+
+  /api/v1/pymes:
+    get:
+      tags:
+      - PymeInsurancePolicy
+      summary: Obtiene todos los seguros asociados a las PYMEs.
+      description: Retorna una lista de todos los seguros asociados a las PYMEs.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PymeOutput'
+        "204":
+          description: No Content - No se encontraron productos de PYMEs
+    post:
+      tags:
+      - PymeInsurancePolicy
+      summary: Crea un nuevo seguro para una PYME.
+      description: Crea un nuevo registro de seguro para una PYME específica.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PymeInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PymeOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+  /api/v1/pymes/{id}:
+    get:
+      tags:
+      - PymeInsurancePolicy
+      summary: Obtiene un seguro de PYME por su ID.
+      description: Retorna los detalles de un seguro de PYME específico basado en su ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID de la PYME.
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PymeOutput'
+        "400":
+          description: Bad Request - Error, código de seguro inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found - Pyme no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - PymeInsurancePolicy
+      summary: Actualiza un seguro de PYME existente.
+      description: Actualiza un registro de seguro para una PYME específica.
+      parameters:
+      - name: id
+        in: path
+        description: ID de la PYME.
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PymeInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PymeOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found - Pyme no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+      - PymeInsurancePolicy
+      summary: Elimina un seguro de PYME por su ID.
+      description: Elimina un registro de seguro para una PYME específica basado en su ID.
+      parameters:
+      - name: id
+        in: path
+        description: ID del seguro de PYME.
+        required: true
+        schema:
+          type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found - Pyme no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+        "500":
+          description: Internal Server Error
+
+  /api/v1/riskEvaluationPerson:
+    get:
+      tags:
+      - RiskEvaluation
+      summary: Obtiene la evaluación de riesgo de una persona.
+      description: Retorna la evaluación de riesgo de una persona específica basada en su ID.
+      parameters:
+      - name: personId
+        in: query
+        description: ID de la persona a evaluar.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEvaluationOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+
+  /api/v1/virtual-assistant:
+    get:
+      tags:
+      - VirtualAssistant
+      summary: Obtiene el historial de chat de una persona.
+      description: Retorna el historial de chat de una persona específica basada en su ID.
+      parameters:
+      - name: personId
+        in: query
+        description: ID de la persona.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAssistantOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    post:
+      tags:
+      - VirtualAssistant
+      summary: Crea un nuevo historial de chat.
+      description: Crea un nuevo registro de historial de chat para una persona específica.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VirtualAssistantInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAssistantOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - VirtualAssistant
+      summary: Actualiza un historial de chat existente.
+      description: Actualiza un registro de historial de chat para una persona específica.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VirtualAssistantInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAssistantOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+
+  /api/v1/life:
+    get:
+      tags:
+      - LifeInsurancePolicy
+      summary: Obtiene los detalles de los seguros de vida.
+      description: Retorna los detalles de los seguros de vida ofrecidos por diferentes compañías de seguros.
+      parameters:
+      - name: personId
+        in: query
+        description: ID de la persona.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LifeOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    post:
+      tags:
+      - LifeInsurancePolicy
+      summary: Crea un nuevo seguro de vida.
+      description: Crea un nuevo registro de seguro de vida para una persona específica.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeInput'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+    put:
+      tags:
+      - LifeInsurancePolicy
+      summary: Actualiza un seguro de vida existente.
+      description: Actualiza un registro de seguro de vida para una persona específica.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifeInput'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifeOutput'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error5xx'
+        "500":
+          description: Internal Server Error
+    delete:
+      tags:
+      - LifeInsurancePolicy
+      summary: Elimina un seguro de vida.
+      description: Elimina un registro de seguro de vida para una persona específica basado en su ID.
+      parameters:
+      - name: personId
+        in: query
+        description: ID de la persona.
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error4xx'
+        "500":
+          description: Internal Server Error
+              
+components:
+  schemas:
+    PersonInput:
+      type: object
+      properties:
+        documentType:
+          type: object
+          properties:
+            id:
+              type: integer
+          description: |
+            Document type. Possible values are:
+            - 1: Singapore National Identity Card (NRIC)
+            - 2: Singaporean Passport
+            - 3: Certificate of Incorporation
+            - 4: Unique Entity Number (UEN)
+            - 5: Goods and Services Tax Identification (GST)
+          example: 2
+        documentNumber:
+          type: string
+          description: |
+            Document number. Maximum length is 12 characters.
+          example: "S12345678"
+        firstName:
+          type: string
+          description: |
+            First name(s) of the person. Maximum length is 50 characters and a minimum of 2 characters is required.
+          example: "Judiht"
+        lastName:
+          type: string
+          description: |
+            Last name of the person. Maximum length is 50 characters.
+          example: "Rojas"
+        secondLastName:
+          type: string
+          description: |
+            Second last name of the person. Maximum length is 50 characters.
+          example: "Barraza"
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+            - other
+          description: |
+            Gender of the person. Valid options are: male, female, other.
+          example: "female"
+        maritalStatus:
+          type: string
+          enum:
+            - single
+            - married
+            - divorced
+            - widow
+          description: |
+            Marital status of the person. Valid options are: single, married, divorced, widow.
+          example: "married"
+        birthdate:
+          type: string
+          format: date
+          description: |
+            Date of birth in YYYY-MM-DD format. Dates earlier than 1900-01-01 or in the future are not allowed.
+          example: "24-02-2000"
+        email:
+          type: string
+          description: |
+            Email address of the person.
+          example: "judith.rojas@gmail.com"
+        phoneNumber:
+          type: integer
+          description: |
+            Phone number of the person.
+          example: 963258741
+    PersonOutput:
+      type: object
+      properties:
+        personId:
+          type: integer
+          description: |
+            Unique ID of the person.
+          example: 1
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+          
+        documentNumber:
+          type: string
+          description: |
+            Document number.
+          example: "S12345678"
+        firstName:
+          type: string
+          description: |
+            First name(s) of the person.
+          example: "Judiht"
+        lastName:
+          type: string
+          description: |
+            Last name of the person.
+          example: "Rojas"
+        secondLastName:
+          type: string
+          description: |
+            Second last name of the person.
+          example: "Barraza"
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+            - other
+          description: |
+            Gender of the person. Valid options are: male, female, other.
+          example: "female"
+        maritalStatus:
+          type: string
+          enum:
+            - single
+            - married
+            - divorced
+            - widow
+          description: |
+            Marital status of the person. Valid options are: single, married, divorced, widow.
+          example: "married"
+        birthdate:
+          type: string
+          format: date
+          description: |
+            Date of birth in YYYY-MM-DD format.
+          example: "24-02-2000"
+        isCustomer:
+          type: boolean
+          description: |
+            Indicates whether the person is a customer or not.
+          example: true
+        email:
+          type: string
+          description: |
+            Email address of the person.
+          example: "judith.rojas@gmail.com"
+        phoneNumber:
+          type: integer
+          description: |
+            Phone number of the person.
+          example: 963258741
+        registerDate:
+          type: string
+          format: date-time
+          description: |
+            Date and time of the person's registration in ISO 8601 format.
+    IdentityInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: The identity's unique identifier.
+        documentType:
+          type: object
+          properties:
+            id:
+              type: string
+              minLength: 1
+              maxLength: 10
+              description: The ID of the document type.
+            description:
+              type: string
+              description: Description of the document type.
+        documentNumber:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: The document number.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: The first name of the identity holder.
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: The last name of the identity holder.
+        secondLastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: The second last name of the identity holder.
+        gender:
+          type: string
+          enum: [MALE, FEMALE, OTHER]
+          description: The gender of the identity holder.
+        maritalStatus:
+          type: string
+          enum: [SINGLE, MARRIED, DIVORCED, WIDOWED]
+          description: The marital status of the identity holder.
+        birthDate:
+          type: string
+          format: date
+          description: The birth date of the identity holder.
+        registerDate:
+          type: string
+          format: date
+          description: The registration date of the identity.
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 10
+                description: The participant's ID.
+              name:
+                type: string
+                minLength: 1
+                maxLength: 50
+                description: The participant's name.
+              relationship:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    minLength: 1
+                    maxLength: 10
+                    description: The ID of the relationship with the identity holder.
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              addressType:
+                type: string
+                enum: [LEGAL, ALTERNATIVE]
+                description: The type of address.
+              formattedAddress:
+                type: string
+                maxLength: 100
+                description: The formatted address.
+              country:
+                type: string
+                maxLength: 50
+                description: The country of the address.
+              postalCode:
+                type: string
+                maxLength: 20
+                description: The postal code of the address.
+              department:
+                type: string
+                maxLength: 50
+                description: The department of the address.
+              province:
+                type: string
+                maxLength: 50
+                description: The province of the address.
+              district:
+                type: string
+                maxLength: 50
+                description: The district of the address.
+        scholarshipGrade:
+          type: string
+          enum: [ELEMENTARY, HIGH_SCHOOL, COLLEGE, GRADUATE]
+          description: The scholarship grade of the identity holder.
+    DocumentType:   # DocumentType schema definition
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: "Singapore National Identity Card (NRIC)"
+
+    TravelQuotationInput:
+      type: object
+      required:
+        - coverageType
+        - countries
+        - travelers
+        - tripDuration
+        - additionalOptions
+        - sortingOrder
+        - hasClaim
+      properties:
+        coverageType:
+          type: string
+          enum: [single, annual]
+          description: Type of coverage. Must be either 'single' or 'annual'.
+          example: single
+        countries:
+          type: array
+          items:
+            type: string
+          description: List of countries to be covered.
+          example: ["Peru"]
+        travelers:
+          type: object
+          properties:
+            adults:
+              type: integer
+              description: Number of adult travelers.
+              example: 2
+            children:
+              type: integer
+              description: Number of child travelers.
+              example: 0
+        tripDuration:
+          type: object
+          properties:
+            noOfDays:
+              type: integer
+              description: Duration of the trip in days.
+              example: 11
+        additionalOptions:
+          type: object
+          properties:
+            diving:
+              type: boolean
+              description: Whether diving coverage is included.
+              example: false
+            skiing:
+              type: boolean
+              description: Whether skiing coverage is included.
+              example: false
+            trekking:
+              type: boolean
+              description: Whether trekking coverage is included.
+              example: false
+            skyDiving:
+              type: boolean
+              description: Whether sky diving coverage is included.
+              example: false
+            rentalCar:
+              type: boolean
+              description: Whether rental car coverage is included.
+              example: false
+            covid19:
+              type: boolean
+              description: Whether COVID-19 coverage is included.
+              example: false
+        sortingOrder:
+          type: string
+          enum: [popularity, price]
+          description: Sorting order for quotations. Must be either 'popularity' or 'price'.
+          example: popularity
+        hasClaim:
+          type: boolean
+          description: Indicates whether the applicant has made a claim before.
+          example: false
+
+    TravelQuotationOutput:
+      type: array
+      items:
+        type: object
+        properties:
+          quotationId:
+            type: integer
+            description: The unique identifier for the quotation.
+            example: 12345
+          currency:
+            type: string
+            description: The currency in which the premiums are quoted.
+            example: USD
+          overseasmedical:
+            type: string
+            description: The coverage limit for overseas medical expenses.
+            example: "$500,000"
+          travelcancellation:
+            type: string
+            description: The coverage limit for travel cancellation expenses.
+            example: "$10,000"
+          baggage:
+            type: string
+            description: The coverage limit for baggage loss or delay.
+            example: "$5,000"
+          benefits:
+            type: array
+            items:
+              type: object
+              properties:
+                benefitId:
+                  type: integer
+                  example: 1
+                decriptionText:
+                  type: string
+                  example: "Covid -19 medical coverage"
+                value:
+                  type: string
+                  description: The value or coverage details of the benefit.
+                  example: "up to $150,000"
+          finalPremium:
+            type: string
+            description: The final premium after applying any discounts.
+            example: "$ 249.70"
+          discount:
+            type: string
+            description: The percentage of discount applied to the premium.
+            example: "45% OFF"
+          orginalPremium:
+            type: string
+            description: The original premium before any discounts.
+            example: "$ 454.00"
+          premiumToSort:
+            type: number
+            description: The premium amount used for sorting quotations.
+            example: 249.7
+
+    AutoQuotationInput:
+      type: object
+      required:
+        - type
+        - accidentClaims
+        - birthDate
+        - carPlateNo
+        - currentCarPlateNo
+        - driverExperience
+        - drivingLicenseYear
+        - email
+        - fullName
+        - gender
+        - mobileNo
+        - ncd
+        - nric
+        - remarks
+        - vehicleModel
+        - vehicleUsage
+      properties:
+        type:
+          type: string
+          description: Type of automobile insurance.
+          example: Car Purchase
+        accidentClaims:
+          type: integer
+          description: Number of accident claims.
+          example: 2
+        birthDate:
+          type: string
+          format: date
+          description: Date of birth of the applicant.
+          example: 2000-01-01
+        carPlateNo:
+          type: string
+          description: Car plate number.
+          example: TBA
+        currentCarPlateNo:
+          type: string
+          description: Current car plate number.
+          example: SJG6768Z
+        driverExperience:
+          type: integer
+          description: Years of driving experience.
+          example: 0
+        drivingLicenseYear:
+          type: integer
+          description: Years of holding a driving license.
+          example: 2
+        email:
+          type: string
+          format: email
+          description: Email address of the applicant.
+          example: AFSFSD@gmail.com
+        fullName:
+          type: string
+          description: Full name of the applicant.
+          example: Judith Rojas
+        gender:
+          type: string
+          enum: [Male, Female, Other]
+          description: Gender of the applicant.
+          example: Male
+        mobileNo:
+          type: string
+          description: Mobile number of the applicant.
+          example: 65721547
+        ncd:
+          type: string
+          description: No claim discount percentage.
+          example: 40%
+        nric:
+          type: string
+          description: National Registration Identity Card number.
+          example: S1234567D
+        remarks:
+          type: string
+          description: Additional remarks or information.
+          example: Additional Information Insurance Plan
+        vehicleModel:
+          type: string
+          description: Model of the vehicle.
+          example: a0c7F000004u8VJQAY
+        vehicleUsage:
+          type: string
+          description: Usage type of the vehicle.
+          example: Private and Social
+
+    AutoQuotationOutput:
+      type: array
+      items:
+        type: object
+        properties:
+          quotationId:
+            type: integer
+            description: The unique identifier for the quotation.
+            example: 12345
+          insurerName:
+            type: string
+            description: The name of the insurance company.
+            example: ABC Insurance
+          coverageType:
+            type: string
+            description: The type of coverage provided by the insurance.
+            example: Comprehensive
+          premium:
+            type: string
+            description: The premium amount for the insurance.
+            example: $500
+          deductible:
+            type: string
+            description: The deductible amount for the insurance.
+            example: $200
+          additionalCoverage:
+            type: array
+            description: Additional coverage options offered by the insurance.
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: The type of additional coverage.
+                  example: Personal Injury Protection
+                limit:
+                  type: string
+                  description: The coverage limit for the additional coverage.
+                  example: $10,000
+
+    PersonalAccidentInput:
+      type: object
+      properties:
+        product_name:
+          type: string
+          description: The name of the personal accident insurance product.
+          example: Seguro de Accidentes Personales Premium
+
+        numInsured:
+          type: integer
+          description: The number of insured persons.
+          example: 4
+
+        coverage:
+          type: object
+          properties:
+            outpatientGP:
+              type: object
+              properties:
+                coPayment:
+                  type: boolean
+                  description: Indicates if there's a co-payment for outpatient general practitioner services.
+                  example: false
+            outpatientSP:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for outpatient specialist services coverage.
+                  example: 0
+                max_limit:
+                  type: integer
+                  description: The maximum limit for outpatient specialist services coverage.
+                  example: 0
+            outpatientDental:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for outpatient dental services coverage.
+                  example: 200
+                max_limit:
+                  type: integer
+                  description: The maximum limit for outpatient dental services coverage.
+                  example: 3000
+            personalAccident:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for personal accident coverage.
+                  example: 100000
+                max_limit:
+                  type: integer
+                  description: The maximum limit for personal accident coverage.
+                  example: 125000
+            termLife:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for term life coverage.
+                  example: 100000
+                max_limit:
+                  type: integer
+                  description: The maximum limit for term life coverage.
+                  example: 125000
+            criticalIllness:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for critical illness coverage.
+                  example: 50000
+                max_limit:
+                  type: integer
+                  description: The maximum limit for critical illness coverage.
+                  example: 75000
+            inpatient:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for inpatient hospitalization coverage.
+                  example: 5000
+                max_limit:
+                  type: integer
+                  description: The maximum limit for inpatient hospitalization coverage.
+                  example: 1000000
+        description:
+          type: string
+          description: Description of the personal accident insurance product.
+          example: Un producto de seguro premium que ofrece una cobertura más amplia y beneficios adicionales.
+
+    PersonalAccidentOutput:
+      type: object
+      properties:
+        productId:
+          type: string
+          description: The ID of the personal accident insurance product.
+          example: 1234567890
+        product_name:
+          type: string
+          description: The name of the personal accident insurance product.
+          example: Seguro de Accidentes Personales Premium
+        numInsured:
+          type: integer
+          description: The number of insured persons.
+          example: 4
+        coverage:
+          type: object
+          properties:
+            outpatientGP:
+              type: object
+              properties:
+                coPayment:
+                  type: boolean
+                  description: Indicates if there's a co-payment for outpatient general practitioner services.
+            outpatientSP:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for outpatient specialist services coverage.
+                max_limit:
+                  type: integer
+                  description: The maximum limit for outpatient specialist services coverage.
+            outpatientDental:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for outpatient dental services coverage.
+                max_limit:
+                  type: integer
+                  description: The maximum limit for outpatient dental services coverage.
+            personalAccident:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for personal accident coverage.
+                max_limit:
+                  type: integer
+                  description: The maximum limit for personal accident coverage.
+            termLife:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for term life coverage.
+                max_limit:
+                  type: integer
+                  description: The maximum limit for term life coverage.
+            criticalIllness:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for critical illness coverage.
+                max_limit:
+                  type: integer
+                  description: The maximum limit for critical illness coverage.
+            inpatient:
+              type: object
+              properties:
+                min_limit:
+                  type: integer
+                  description: The minimum limit for inpatient hospitalization coverage.
+                max_limit:
+                  type: integer
+                  description: The maximum limit for inpatient hospitalization coverage.
+        description:
+          type: string
+          description: Description of the personal accident insurance product.
+        registerDate:
+          type: string
+          format: date
+          description: Date of registration of the personal accident insurance product.
+
+    InsuranceCompanyInput:
+      type: object
+      properties:
+        documentType:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: The ID of the document type.
+              example: 3
+            description:
+              type: string
+              description: Description of the document type.
+              example: Certificate of Incorporation
+        documentNumber:
+          type: string
+          description: The document number.
+          example: 1234567890
+        companyName:
+          type: string
+          description: The name of the insurance company.
+          example: SingaSure Insurance
+
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              description: The city where the company is located.
+              example: Singapore
+            postalCode:
+              type: string
+              description: The postal code of the company's location.
+              example: '123456'
+            addressLegal:
+              type: string
+              description: The legal address of the company.
+              example: 123 Main Street
+            referentialAddress:
+              type: string
+              description: The referential address of the company.
+              example: Unit 456
+        foundedDate:
+          type: string
+          format: date
+          description: The date the company was founded.
+          example: 1985-05-15
+        ceo:
+          type: string
+          description: The name of the CEO of the company.
+          example: John Tan
+
+        contactEmail:
+          type: string
+          format: email
+          description: The contact email address of the company.
+          example: info@singasure.com
+
+        phoneNumber:
+          type: string
+          description: The phone number of the company.
+          example: '+65 1234 5678'
+
+    InsuranceCompanyOutput:
+      type: object
+      properties:
+        companyId:
+          type: string
+          description: The ID of the insurance company.
+          example: '1234567890'
+        companyName:
+          type: string
+          description: The name of the insurance company.
+          example: SingaSure Insurance
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              description: The city where the company is located.
+            postalCode:
+              type: string
+              description: The postal code of the company's location.
+            addressLegal:
+              type: string
+              description: The legal address of the company.
+            referentialAddress:
+              type: string
+              description: The referential address of the company.
+        foundedDate:
+          type: string
+          format: date
+          description: The date the company was founded.
+        ceo:
+          type: string
+          description: The name of the CEO of the company.
+        contactEmail:
+          type: string
+          format: email
+          description: The contact email address of the company.
+        phoneNumber:
+          type: string
+          description: The phone number of the company.
+        documentType:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: The ID of the document type.
+            description:
+              type: string
+              description: Description of the document type.
+        documentNumber:
+          type: string
+          description: The document number.
+        registerDate:
+          type: string
+          format: date
+          description: Date of registration of the insurance company.
+
+    HomeInsurancePolicyInput:
+      type: object
+      properties:
+        quotationId:
+          type: integer
+          description: ID de la cotización asociada al seguro de hogar.
+          example: 123     
+        propertyType:
+          type: string
+          description: Tipo de propiedad (casa, apartamento, etc.).
+          example: house
+          enum:
+          - house
+          - apartment
+        address:
+          type: string
+          description: Dirección de la propiedad.
+          example: "123 Main St"
+        propertyValue:
+          type: number
+          description: Valor de la propiedad.
+          example: 250000
+        coverageAmount:
+          type: number
+          description: Monto de cobertura del seguro.
+          example: 200000
+        policyHolderId:
+          type: integer
+          description: ID del titular de la póliza.
+          example: 1
+    HomeInsurancePolicyOutput:
+      type: object
+      properties:
+        insuranceId:
+          type: integer
+          readOnly: true
+          example: 1
+        quotationId:
+          type: integer
+          description: ID de la cotización asociada al seguro de hogar.
+          example: 123
+        propertyType:
+          type: string
+          description: Tipo de propiedad.
+          readOnly: true
+          example: house
+          enum:
+          - house
+          - apartment
+        address:
+          type: string
+          description: Dirección de la propiedad.
+          readOnly: true
+          example: "123 Main St"
+        propertyValue:
+          type: number
+          description: Valor de la propiedad.
+          readOnly: true
+          example: 250000
+        coverageAmount:
+          type: number
+          description: Monto de cobertura del seguro.
+          readOnly: true
+          example: 200000
+        policyHolderId:
+          type: integer
+          description: ID del titular de la póliza.
+          readOnly: true
+          example: 1
+    TravelInsurancePolicyInput:
+      type: object
+      properties:
+        quotationId:
+          type: integer
+          description: ID de la cotización asociada al seguro de viaje.
+          example: 456
+        tripType:
+          type: string
+          description: |
+            Tipo de viaje:
+            - domestic: Nacional
+            - international: Internacional
+          example: international
+          enum:
+          - domestic
+          - international
+        destination:
+          type: string
+          description: Destino del viaje.
+          example: "Spain"
+        startDate:
+          type: string
+          description: Fecha de inicio del viaje en formato YYYY-MM-DD.
+          format: date
+          example: 2023-06-01
+        endDate:
+          type: string
+          description: Fecha de fin del viaje en formato YYYY-MM-DD.
+          format: date
+          example: 2023-06-15
+        coverageAmount:
+          type: number
+          description: Monto de cobertura del seguro.
+          example: 100000
+        policyHolderId:
+          type: integer
+          description: ID del titular de la póliza.
+          example: 1
+    TravelInsurancePolicyOutput:
+      type: object
+      properties:
+        insuranceId:
+          type: integer
+          readOnly: true
+          example: 1
+        quotationId:
+          type: integer
+          description: ID de la cotización asociada al seguro de viaje.
+          example: 456
+        tripType:
+          type: string
+          description: Tipo de viaje.
+          readOnly: true
+          example: international
+          enum:
+          - domestic
+          - international
+        destination:
+          type: string
+          description: Destino del viaje.
+          readOnly: true
+          example: "Spain"
+        startDate:
+          type: string
+          description: Fecha de inicio del viaje.
+          format: date
+          readOnly: true
+          example: 2023-06-01
+        endDate:
+          type: string
+          description: Fecha de fin del viaje.
+          format: date
+          readOnly: true
+          example: 2023-06-15
+        coverageAmount:
+          type: number
+          description: Monto de cobertura del seguro.
+          readOnly: true
+          example: 100000
+        policyHolderId:
+          type: integer
+          description: ID del titular de la póliza.
+          readOnly: true
+          example: 1
+    PaymentInput:
+      type: object
+      properties:
+        insuranceId:
+          type: integer
+          description: ID del seguro asociado al pago.
+          example: 1
+        amount:
+          type: number
+          description: Monto del pago.
+          example: 500
+        paymentMethod:
+          type: string
+          description: |
+            Método de pago:
+            - credit_card: Tarjeta de crédito
+            - debit_card: Tarjeta de débito
+            - bank_transfer: Transferencia bancaria
+          example: credit_card
+          enum:
+          - credit_card
+          - debit_card
+          - bank_transfer
+        paymentDate:
+          type: string
+          description: Fecha del pago en formato YYYY-MM-DD.
+          format: date
+          example: 2023-06-01
+    PaymentOutput:
+      type: object
+      properties:
+        paymentId:
+          type: integer
+          readOnly: true
+          example: 1
+        quotationId:
+          type: integer
+          description: ID de la cotización asociada al pago.
+          example: 789
+        insuranceId:
+          type: integer
+          description: ID del seguro asociado al pago.
+          readOnly: true
+          example: 1
+        amount:
+          type: number
+          description: Monto del pago.
+          readOnly: true
+          example: 500
+        paymentMethod:
+          type: string
+          description: Método de pago.
+          readOnly: true
+          example: credit_card
+          enum:
+          - credit_card
+          - debit_card
+          - bank_transfer
+        paymentDate:
+          type: string
+          description: Fecha del pago.
+          format: date
+          readOnly: true
+          example: 2023-06-01
+
+    CarInput:
+      type: object
+      properties:
+        carId:
+          type: string
+          description: ID del automóvil.
+          example: "car_12345"
+        ownerId:
+          type: string
+          description: ID del propietario del automóvil.
+          example: "user_67890"
+        quotationId:
+          type: integer
+          description: ID de la cotización de la póliza.
+          example: 1001
+        insuranceCompany:
+          type: string
+          description: Compañía de seguros.
+          example: "Seguro ABC"
+        policyNumber:
+          type: string
+          description: Número de póliza.
+          example: "POL123456"
+        coverage:
+          type: string
+          description: Cobertura del seguro.
+          example: "Cobertura completa"
+        startDate:
+          type: string
+          format: date
+          description: Fecha de inicio del seguro.
+          example: "2024-01-01"
+        endDate:
+          type: string
+          format: date
+          description: Fecha de finalización del seguro.
+          example: "2025-01-01"
+    CarOutput:
+      type: object
+      properties:
+        carId:
+          type: string
+          description: ID del automóvil.
+          example: "car_12345"
+        ownerId:
+          type: string
+          description: ID del propietario del automóvil.
+          example: "user_67890"
+        quotationId:
+          type: integer
+          description: ID de la cotización de la póliza.
+          example: 1001
+        insuranceCompany:
+          type: string
+          description: Compañía de seguros.
+          example: "Seguro ABC"
+        policyNumber:
+          type: string
+          description: Número de póliza.
+          example: "POL123456"
+        coverage:
+          type: string
+          description: Cobertura del seguro.
+          example: "Cobertura completa"
+        startDate:
+          type: string
+          format: date
+          description: Fecha de inicio del seguro.
+          example: "2024-01-01"
+        endDate:
+          type: string
+          format: date
+          description: Fecha de finalización del seguro.
+          example: "2025-01-01"
+
+    PymeInput:
+      type: object
+      properties:
+        total_employee:
+          type: integer
+          description: Número total de empleados.
+          example: 50
+        average_age:
+          type: integer
+          description: Edad promedio de los empleados.
+          example: 35
+        is_private:
+          type: boolean
+          description: Indica si la PYME es privada.
+          example: true
+        bedded:
+          type: integer
+          description: Número de camas disponibles.
+          example: 10
+        is_sorted_ascending:
+          type: boolean
+          description: Indica si los datos están ordenados de forma ascendente.
+          example: true
+        register_date:
+          type: string
+          format: date
+          description: Fecha de registro.
+          example: "2024-01-01"
+        coverage:
+          type: object
+          properties:
+            outpatient_gp:
+              type: boolean
+              description: Cobertura de consultas externas generales.
+              example: true
+            outpatient_sp:
+              type: boolean
+              description: Cobertura de consultas externas especializadas.
+              example: true
+            outpatient_dental:
+              type: boolean
+              description: Cobertura de consultas dentales externas.
+              example: true
+            personal_accident:
+              type: boolean
+              description: Cobertura de accidentes personales.
+              example: true
+            term_life:
+              type: boolean
+              description: Cobertura de seguro de vida temporal.
+              example: true
+            critical_illness:
+              type: boolean
+              description: Cobertura de enfermedades críticas.
+              example: true
+    PymeOutput:
+      type: object
+      properties:
+        pymesId:
+          type: integer
+          description: ID de la PYME.
+          example: 1
+        total_employee:
+          type: integer
+          description: Número total de empleados.
+          example: 50
+        average_age:
+          type: integer
+          description: Edad promedio de los empleados.
+          example: 35
+        is_private:
+          type: boolean
+          description: Indica si la PYME es privada.
+          example: true
+        bedded:
+          type: integer
+          description: Número de camas disponibles.
+          example: 10
+        is_sorted_ascending:
+          type: boolean
+          description: Indica si los datos están ordenados de forma ascendente.
+          example: true
+        register_date:
+          type: string
+          format: date
+          description: Fecha de registro.
+          example: "2024-01-01"
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: integer
+                description: ID del producto.
+                example: 1
+              quotationId:
+                type: integer
+                description: ID de la cotización del producto.
+                example: 1001
+              product_name:
+                type: string
+                description: Nombre del producto.
+                example: "Seguro ABC"
+              product_options:
+                type: string
+                description: Opciones del producto.
+                example: "Opción 1, Opción 2"
+              top_feature:
+                type: string
+                description: Característica principal del producto.
+                example: "Cobertura completa"
+              inpatient:
+                type: string
+                description: Cobertura de internación.
+                example: "Cobertura de internación"
+              outpatient_gp:
+                type: string
+                description: Cobertura de consultas externas generales.
+                example: "Cobertura de consultas externas generales"
+              outpatient_sp:
+                type: string
+                description: Cobertura de consultas externas especializadas.
+                example: "Cobertura de consultas externas especializadas"
+              outpatient_dental:
+                type: string
+                description: Cobertura de consultas dentales externas.
+                example: "Cobertura de consultas dentales externas"
+              personal_accident:
+                type: string
+                description: Cobertura de accidentes personales.
+                example: "Cobertura de accidentes personales"
+              term_life:
+                type: string
+                description: Cobertura de seguro de vida temporal.
+                example: "Cobertura de seguro de vida temporal"
+              critical_illness:
+                type: string
+                description: Cobertura de enfermedades críticas.
+                example: "Cobertura de enfermedades críticas"
+              premium_per_pax:
+                type: number
+                format: float
+                description: Prima por persona.
+                example: 100.50
+              total_premium:
+                type: number
+                format: float
+                description: Prima total.
+                example: 1000.50
+
+    RiskEvaluationOutput:
+      type: object
+      properties:
+        documentTypeId:
+          type: integer
+          description: Tipo de documento.
+          example: 1
+        documentNumber:
+          type: string
+          description: Número de documento.
+          example: "12345678"
+        score:
+          type: integer
+          description: Puntaje de riesgo (1-100).
+          example: 85
+        category:
+          type: string
+          description: Categoría de riesgo.
+          enum:
+          - ALTA
+          - MEDIA
+          - BAJA
+          example: ALTA
+        risk-level:
+          type: string
+          description: Nivel de riesgo.
+          enum:
+          - ALTA
+          - MEDIA
+          - BAJA
+          example: ALTA
+        result:
+          type: string
+          description: Resultado de la evaluación.
+          enum:
+          - APROBADO
+          - RECHAZADO
+          example: APROBADO
+        justifications:
+          type: string
+          description: Justificaciones de la evaluación.
+          example: "Historial de crédito limpio"
+
+    VirtualAssistantInput:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: ID de la persona.
+          example: "user_12345"
+        fullName:
+          type: string
+          description: Nombre completo de la persona.
+          example: "Juan Pérez"
+        message:
+          type: string
+          description: Mensaje enviado por la persona.
+          example: "Hola, me gustaría obtener una cotización de seguro de vida."
+        chat_history:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Mensaje en el historial de chat.
+                example: "Hello, how can I assist you today?"
+              type:
+                type: string
+                description: Tipo de mensaje (bot o user).
+                example: "bot"
+              date:
+                type: string
+                format: date-time
+                description: Fecha y hora del mensaje.
+                example: "2024-05-15T10:30:00Z"
+        location:
+          type: string
+          description: Ubicación de la persona.
+          example: "Ciudad Ejemplo"
+        language:
+          type: string
+          description: Idioma de la persona.
+          example: "español"
+        time:
+          type: string
+          format: date-time
+          description: Hora del mensaje.
+          example: "2024-05-15T10:00:00"
+    VirtualAssistantOutput:
+      type: object
+      properties:
+        chat_id:
+          type: string
+          description: ID del chat.
+          example: "chat_67890"
+        bot_message:
+          type: string
+          description: Mensaje del bot.
+          example: "Sure, John. To provide you with a life insurance quote, I'll need some additional information. Could you please tell me your date of birth and if you have any pre-existing medical conditions?"
+        response_options:
+          type: array
+          items:
+            type: string
+            description: Opciones de respuesta.
+            example: "My date of birth is June 15, 1985, and I have no pre-existing medical conditions."
+        chat_status:
+          type: string
+          description: Estado del chat.
+          example: "in progress"
+        recommendations:
+          type: array
+          items:
+            type: string
+            description: Recomendaciones adicionales.
+            example: "Make sure to have your medical and financial history handy for an accurate quote."
+
+    LifeInput:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: ID de la persona.
+          example: "user_12345"
+        quotationId:
+          type: integer
+          description: ID de la cotización de la póliza.
+          example: 1001
+        insuranceCompany:
+          type: string
+          description: Compañía de seguros.
+          example: "Seguro ABC"
+        policyNumber:
+          type: string
+          description: Número de póliza.
+          example: "POL123456"
+        coverage:
+          type: string
+          description: Cobertura del seguro.
+          example: "Cobertura completa"
+        startDate:
+          type: string
+          format: date
+          description: Fecha de inicio del seguro.
+          example: "2024-01-01"
+        endDate:
+          type: string
+          format: date
+          description: Fecha de finalización del seguro.
+          example: "2025-01-01"
+        premium:
+          type: number
+          format: float
+          description: Prima del seguro.
+          example: 100.50
+        coverages:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Tipo de cobertura.
+                example: "death"
+              description:
+                type: string
+                description: Descripción de la cobertura.
+                example: "Coverage in case of death"
+    LifeOutput:
+      type: object
+      properties:
+        personId:
+          type: string
+          description: ID de la persona.
+          example: "user_12345"
+        quotationId:
+          type: integer
+          description: ID de la cotización de la póliza.
+          example: 1001
+        insuranceCompany:
+          type: string
+          description: Compañía de seguros.
+          example: "Seguro ABC"
+        policyNumber:
+          type: string
+          description: Número de póliza.
+          example: "POL123456"
+        coverage:
+          type: string
+          description: Cobertura del seguro.
+          example: "Cobertura completa"
+        startDate:
+          type: string
+          format: date
+          description: Fecha de inicio del seguro.
+          example: "2024-01-01"
+        endDate:
+          type: string
+          format: date
+          description: Fecha de finalización del seguro.
+          example: "2025-01-01"
+        premium:
+          type: number
+          format: float
+          description: Prima del seguro.
+          example: 100.50
+        coverages:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Tipo de cobertura.
+                example: "death"
+              description:
+                type: string
+                description: Descripción de la cobertura.
+                example: "Coverage in case of death"
+          
+    Error4xx:
+      type: object
+      properties:
+        error-code:
+          type: string
+          example: "ERR0003"
+        error-message:
+          type: string
+          example: "Error, person not found"
+        trace-id:
+          type: string
+          example: "654a3a56-3be9-4001-85e0-9ca7ac59b1be"
+
+    Error5xx:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "2003: Can't connect to MySQL server"
+
+    ErrorBadRequest:
+      type: object
+      properties:
+        error-code:
+          type: string
+          example: "ERR0001"
+        error-message:
+          type: string
+          example: "Error, Field required"
+        trace-id:
+          type: string
+          example: "654a3a56-3be9-4001-85e0-9ca7ac59b1be"
+
+    ErrorNotFound:
+      type: object
+      properties:
+        error-code:
+          type: string
+          example: "ERR0003"
+        error-message:
+          type: string
+          example: "Error, id not found"
+        trace-id:
+          type: string
+          example: "654a3a56-3be9-4001-85e0-9ca7ac59b1be"
